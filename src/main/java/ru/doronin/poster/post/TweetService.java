@@ -39,7 +39,7 @@ public class TweetService {
     }
 
     public Flux<Tweet> loadAll() {
-        return tweetRepository.findAll(new Sort(Sort.Direction.DESC, "modified"));
+        return tweetRepository.findAll(Sort.by(Sort.Direction.DESC, "modified"));
     }
 
     public Mono<Void> delete(Tweet tweet) {

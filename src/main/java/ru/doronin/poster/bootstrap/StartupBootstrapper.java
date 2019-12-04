@@ -15,6 +15,7 @@ import ru.doronin.poster.user.SystemUser;
 import ru.doronin.poster.user.UserService;
 
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.stream.Stream;
 
 /**
@@ -52,13 +53,16 @@ public class StartupBootstrapper implements ApplicationListener<ContextRefreshed
     private Flux<Tweet> generateTweets(SystemUser user) {
         return Flux.fromStream(Stream.iterate(0, i -> i++)
                 .limit(SECURE_RANDOM.nextInt(9) + 1))
-                .flatMap(i -> generateTweet(user));
+                .flatMap(i -> generateTweet(user, i));
     }
 
-    private Mono<Tweet> generateTweet(SystemUser user) {
+    private Mono<Tweet> generateTweet(SystemUser user, int salt) {
+        Instant moment = Instant.now().minusSeconds(salt * 60 + SECURE_RANDOM.nextInt(40));
         Tweet tweet = Tweet.builder()
                 .author(user)
                 .content(FAKER_INSTANCE.gameOfThrones().quote())
+                .created(moment)
+                .modified(moment)
                 .build();
         return tweetService.save(tweet);
     }

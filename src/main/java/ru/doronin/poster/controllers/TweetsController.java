@@ -23,7 +23,7 @@ import java.util.Collections;
 @Profile("controllers")
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping(value = "/tweets", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping(value = "/tweets", produces = MediaType.APPLICATION_JSON_VALUE)
 public class TweetsController {
     private final TweetService tweetService;
     private final UserService userService;
@@ -36,7 +36,7 @@ public class TweetsController {
     /**
      * Publish new tweet
      */
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Object>> shareTweet(@RequestBody JsonNode jsonNode) {
         if (!jsonNode.has("tweet")) {
             return Mono.just(new ResponseEntity<>(Collections.singletonMap("message", "Text not specified"),
@@ -46,7 +46,7 @@ public class TweetsController {
                 .asText(), userService.getCurrent()), HttpStatus.CREATED));
     }
 
-    @PutMapping(consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Object>> updateTweet(@RequestBody Tweet tweet) {
         if (tweet == null || tweet.getId() == null) {
             return Mono.just(new ResponseEntity<>(Collections.singletonMap("message", "Message identifier not specified"),

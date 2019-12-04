@@ -15,6 +15,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 import ru.doronin.poster.post.Tweet;
 import ru.doronin.poster.post.TweetService;
+import ru.doronin.poster.references.SystemReferencesService;
 import ru.doronin.poster.user.SystemUser;
 import ru.doronin.poster.user.UserService;
 
@@ -30,6 +31,7 @@ import java.util.Collections;
 public class RoutingConfiguration {
     private final TweetService tweetService;
     private final UserService userService;
+    private final SystemReferencesService systemReferencesService;
 
     /**
      * Functional way to route request processing. Awesome, isn't it?
@@ -38,6 +40,9 @@ public class RoutingConfiguration {
     public RouterFunction<ServerResponse> routerFunction() {
         return RouterFunctions.route()
                 .GET("/tweets", request -> handleAllTweetsRequest())
+                .GET("/login", this::renderLoginPage)
+                .GET("/index", this::renderIndexPage)
+                .GET("/", this::renderIndexPage)
                 .POST("/tweets", this::handlePublishTweet)
                 .PUT("/tweets", this::handleUpdateTweet)
                 .DELETE("/tweets/{id}", this::handleDeleteTweet)
@@ -46,11 +51,21 @@ public class RoutingConfiguration {
                 .build();
     }
 
+    private Mono<ServerResponse> renderLoginPage(ServerRequest request) {
+        return ServerResponse.ok().render("login",
+                Collections.singletonMap("isDemo", systemReferencesService.isDemo()));
+    }
+
+    private Mono<ServerResponse> renderIndexPage(ServerRequest request) {
+        return ServerResponse.ok().render("index",
+                Collections.singletonMap("isDemo", systemReferencesService.isDemo()));
+    }
+
     private Mono<ServerResponse> handleUpdateTweet(ServerRequest request) {
         return request.bodyToMono(Tweet.class).flatMap(tweet -> {
             if (tweet.getId() == null) {
                 return ServerResponse.badRequest()
-                        .syncBody(Collections.singletonMap("message", "Message identifier not specified"));
+                        .bodyValue(Collections.singletonMap("message", "Message identifier not specified"));
             } else {
                 return userService.getCurrent().flatMap(user -> tweetService.load(tweet.getId())
                         .flatMap(foundTweet -> {
@@ -59,11 +74,11 @@ public class RoutingConfiguration {
                                 return ServerResponse.ok().body(tweetService.save(foundTweet), Tweet.class);
                             } else {
                                 return ServerResponse.status(HttpStatus.FORBIDDEN)
-                                        .syncBody(Collections.singletonMap("message", "Access denied"));
+                                        .bodyValue(Collections.singletonMap("message", "Access denied"));
                             }
                         })
                         .switchIfEmpty(ServerResponse.badRequest()
-                                .syncBody(Collections.singletonMap("message", "Message not found"))));
+                                .bodyValue(Collections.singletonMap("message", "Message not found"))));
             }
         });
     }
@@ -71,18 +86,18 @@ public class RoutingConfiguration {
     private Mono<ServerResponse> handleDeleteTweet(ServerRequest request) {
         String id = request.pathVariable("id");
         if (id == null) {
-            return ServerResponse.badRequest().syncBody(Collections.singletonMap("message", "Tweet not specified"));
+            return ServerResponse.badRequest().bodyValue(Collections.singletonMap("message", "Tweet not specified"));
         }
         return tweetService.load(id).flatMap(tweet ->
                 userService.getCurrent().flatMap(user -> {
                     if (user.getLogin().equals(tweet.getAuthor().getLogin())) {
                         return tweetService.delete(tweet)
-                                .then(ServerResponse.ok().syncBody(Collections.singletonMap("message", "Tweet deleted")));
+                                .then(ServerResponse.ok().bodyValue(Collections.singletonMap("message", "Tweet deleted")));
                     } else {
-                        return ServerResponse.status(HttpStatus.FORBIDDEN).syncBody(Collections.singletonMap("message", "Access denied"));
+                        return ServerResponse.status(HttpStatus.FORBIDDEN).bodyValue(Collections.singletonMap("message", "Access denied"));
                     }
                 })
-        ).switchIfEmpty(ServerResponse.badRequest().syncBody(Collections.singletonMap("message", "Tweet not found")));
+        ).switchIfEmpty(ServerResponse.badRequest().bodyValue(Collections.singletonMap("message", "Tweet not found")));
     }
 
     private Mono<ServerResponse> handleSignUp(ServerRequest request) {
@@ -91,11 +106,11 @@ public class RoutingConfiguration {
                     || StringUtils.isEmpty(user.getLogin())
                     || StringUtils.isEmpty(user.getPassword())) {
                 return ServerResponse.badRequest()
-                        .syncBody(Collections.singletonMap("message", "User credentials not specified"));
+                        .bodyValue(Collections.singletonMap("message", "User credentials not specified"));
             } else {
                 return userService.loadByLogin(user.getLogin())
                         .flatMap(found ->
-                                ServerResponse.badRequest().syncBody(Collections.singletonMap("message", "User with such login already exists")))
+                                ServerResponse.badRequest().bodyValue(Collections.singletonMap("message", "User with such login already exists")))
                         .switchIfEmpty(Mono.defer(() ->
                                 ServerResponse.ok().body(userService.save(user), SystemUser.class)));
             }
@@ -109,7 +124,7 @@ public class RoutingConfiguration {
     private Mono<ServerResponse> handlePublishTweet(ServerRequest request) {
         return request.bodyToMono(JsonNode.class).flatMap(node -> {
             if (!node.has("tweet")) {
-                return ServerResponse.badRequest().syncBody(Collections.singletonMap("message", "Text not specified"));
+                return ServerResponse.badRequest().bodyValue(Collections.singletonMap("message", "Text not specified"));
             }
             return ServerResponse.ok().body(tweetService.create(node.get("tweet")
                     .asText(), userService.getCurrent()), Tweet.class);
