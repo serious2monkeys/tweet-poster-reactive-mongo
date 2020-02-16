@@ -34,8 +34,8 @@ public class StartupBootstrapper implements ApplicationListener<ContextRefreshed
     public void onApplicationEvent(ContextRefreshedEvent event) {
         long users = userService.countRecords(),
                 tweets = tweetService.countRecords();
-        log.info(users == 0 ? "There is no users in the DB" : String.format("There are %d users in the DB", users));
-        log.info(tweets == 0 ? "There is no tweets in the DB" : String.format("There are %d tweets in the DB", tweets));
+        log.info(users == 0 ? "There are no users in the DB" : String.format("There are %d users in the DB", users));
+        log.info(tweets == 0 ? "There are no tweets in the DB" : String.format("There are %d tweets in the DB", tweets));
         if (users == 0 && tweets == 0) {
             SystemUser admin = SystemUser.builder()
                     .login("admin")

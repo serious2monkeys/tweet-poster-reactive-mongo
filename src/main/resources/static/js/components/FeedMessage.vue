@@ -11,23 +11,44 @@
                 ({{ new Date(tweet.created).toLocaleString("ru")}})
             </span>
                 </v-card-title>
-                <v-card-text class="headline font-weight-bold" primary-title>
+                <v-card-text class="headline font-weight-light" primary-title>
                     {{ tweet.content }}
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer/>
                     <v-btn @click="delTweet" color="primary" v-if="isMine">Удалить</v-btn>
-                    <v-btn @click="editTweet" v-if="isMine">Обновить</v-btn>
+                    <v-btn @click="showDialog = true" v-if="isMine">Обновить</v-btn>
                 </v-card-actions>
             </v-card>
         </v-col>
+        <v-dialog max-width="500px" persistent v-model="showDialog">
+            <v-card>
+                <v-card-title>
+                    <span class="headline">Update tweet</span>
+                </v-card-title>
+                <v-card-text>
+                    <v-container>
+                        <v-text-field
+                                hint="Enter tweet"
+                                label="Tweet text"
+                                persistent-hint
+                                required
+                                v-model="tweet.content"/>
+                    </v-container>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn @click="editTweet" color="blue darken-1" text>Save</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </v-row>
 </template>
 
 <script>
     export default {
         name: "FeedMessage",
-        props: ['tweet', 'deleteTweet'],
+        props: ['tweet', 'deleteTweet', 'showDialog'],
         computed: {
             isMine() {
                 return this.tweet.author.id == userId
@@ -38,6 +59,7 @@
                 this.deleteTweet(this.tweet)
             },
             editTweet() {
+                this.showDialog = false;
                 this.$resource('/tweets').update(this.tweet)
                     .then(response => response.json().then(result => {
                         this.tweet = result;

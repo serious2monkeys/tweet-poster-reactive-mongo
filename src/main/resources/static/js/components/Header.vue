@@ -1,12 +1,13 @@
 <template>
-    <v-app-bar>
+    <v-app-bar fixed dense>
         <v-app-bar-nav-icon></v-app-bar-nav-icon>
         <v-toolbar-title>
             Brand-new TweetApp
-            <v-btn v-if="hasUser" href="/logout" icon>
-                <v-icon>exit_to_app</v-icon>
-            </v-btn>
         </v-toolbar-title>
+        <v-spacer/>
+        <v-btn v-if="hasUser" href="/logout" icon>
+            <v-icon>exit_to_app</v-icon>
+        </v-btn>
     </v-app-bar>
 </template>
 

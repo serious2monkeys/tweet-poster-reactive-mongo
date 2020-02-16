@@ -1,8 +1,8 @@
 <template>
     <div>
-        <FeedMessage :key="tweet.id"
+        <FeedMessage :deleteTweet="deleteTweet"
+                     :key="tweet.id"
                      :tweet="tweet"
-                     :deleteTweet="deleteTweet"
                      v-for="tweet in sortedTweets"/>
     </div>
 </template>

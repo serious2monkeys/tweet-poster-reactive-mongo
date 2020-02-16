@@ -9,6 +9,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -43,10 +44,10 @@ public class UserService {
 
         Optional<SystemUser> storedUser = loadById(user.getId()).blockOptional();
         if (user.getPassword() == null) {
-            return storedUser.get().getPassword();
+            return storedUser.orElseThrow(() -> new NoSuchElementException("User not found")).getPassword();
         }
 
-        if (!storedUser.get().getPassword().equals(user.getPassword())) {
+        if (storedUser.map(stored -> stored.getPassword().equals(user.getPassword())).orElse(false)) {
             return passwordEncoder.encode(user.getPassword());
         }
         return user.getPassword();

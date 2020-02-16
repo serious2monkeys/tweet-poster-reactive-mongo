@@ -21,12 +21,12 @@ import java.util.Collections;
 public class UserController {
     private final UserService userService;
 
-    @GetMapping(value = "/me", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/me", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<SystemUser> introduce() {
         return userService.getCurrent();
     }
 
-    @GetMapping(value = "/user/{login}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/user/{login}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Object>> getUserInfo(@PathVariable("login") String login) {
         if (login == null) {
             return Mono.just(new ResponseEntity<>(Collections.singletonMap("message", "User not specified"),
@@ -39,8 +39,8 @@ public class UserController {
     }
 
     @PostMapping(value = "/signup",
-            consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Object>> signUp(@RequestBody SystemUser user) {
         if (StringUtils.isEmpty(user) || StringUtils.isEmpty(user.getLogin()) || StringUtils.isEmpty(user.getPassword())) {
             return Mono.just(new ResponseEntity<>(Collections.singletonMap("message", "User credentials not specified"),

@@ -84,21 +84,23 @@ public class RoutingConfiguration {
     }
 
     private Mono<ServerResponse> handleDeleteTweet(ServerRequest request) {
-        String id = request.pathVariable("id");
-        if (id == null) {
+        try {
+            String id = request.pathVariable("id");
+            return tweetService.load(id).flatMap(tweet ->
+                    userService.getCurrent().flatMap(user -> {
+                        if (user.getLogin().equals(tweet.getAuthor().getLogin())) {
+                            return tweetService.delete(tweet)
+                                    .then(ServerResponse.ok().bodyValue(Collections.singletonMap("message", "Tweet deleted")));
+                        } else {
+                            return ServerResponse.status(HttpStatus.FORBIDDEN).bodyValue(Collections.singletonMap("message", "Access denied"));
+                        }
+                    })
+            ).switchIfEmpty(ServerResponse.badRequest().bodyValue(Collections.singletonMap("message", "Tweet not found")));
+        } catch (IllegalArgumentException ex) {
             return ServerResponse.badRequest().bodyValue(Collections.singletonMap("message", "Tweet not specified"));
         }
-        return tweetService.load(id).flatMap(tweet ->
-                userService.getCurrent().flatMap(user -> {
-                    if (user.getLogin().equals(tweet.getAuthor().getLogin())) {
-                        return tweetService.delete(tweet)
-                                .then(ServerResponse.ok().bodyValue(Collections.singletonMap("message", "Tweet deleted")));
-                    } else {
-                        return ServerResponse.status(HttpStatus.FORBIDDEN).bodyValue(Collections.singletonMap("message", "Access denied"));
-                    }
-                })
-        ).switchIfEmpty(ServerResponse.badRequest().bodyValue(Collections.singletonMap("message", "Tweet not found")));
     }
+
 
     private Mono<ServerResponse> handleSignUp(ServerRequest request) {
         return request.bodyToMono(SystemUser.class).flatMap(user -> {
