@@ -84,9 +84,8 @@ public class RoutingConfiguration {
     }
 
     private Mono<ServerResponse> handleDeleteTweet(ServerRequest request) {
-        try {
-            String id = request.pathVariable("id");
-            return tweetService.load(id).flatMap(tweet ->
+        if (request.pathVariables().containsKey("id")) {
+            return tweetService.load(request.pathVariable("id")).flatMap(tweet ->
                     userService.getCurrent().flatMap(user -> {
                         if (user.getLogin().equals(tweet.getAuthor().getLogin())) {
                             return tweetService.delete(tweet)
@@ -96,11 +95,9 @@ public class RoutingConfiguration {
                         }
                     })
             ).switchIfEmpty(ServerResponse.badRequest().bodyValue(Collections.singletonMap("message", "Tweet not found")));
-        } catch (IllegalArgumentException ex) {
-            return ServerResponse.badRequest().bodyValue(Collections.singletonMap("message", "Tweet not specified"));
         }
+        return ServerResponse.badRequest().bodyValue(Collections.singletonMap("message", "Tweet not specified"));
     }
-
 
     private Mono<ServerResponse> handleSignUp(ServerRequest request) {
         return request.bodyToMono(SystemUser.class).flatMap(user -> {
