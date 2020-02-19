@@ -1,6 +1,6 @@
 <template>
     <v-app-bar fixed dense>
-        <v-app-bar-nav-icon></v-app-bar-nav-icon>
+        <v-app-bar-nav-icon/>
         <v-toolbar-title>
             Brand-new TweetApp
         </v-toolbar-title>

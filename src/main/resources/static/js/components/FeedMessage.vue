@@ -16,8 +16,8 @@
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer/>
-                    <v-btn @click="delTweet" color="primary" v-if="isMine">Удалить</v-btn>
-                    <v-btn @click="showDialog = true" v-if="isMine">Обновить</v-btn>
+                    <v-btn @click="delTweet" color="primary" v-if="isMine">Delete</v-btn>
+                    <v-btn @click="showDialog = true" v-if="isMine">Update</v-btn>
                 </v-card-actions>
             </v-card>
         </v-col>
@@ -37,7 +37,7 @@
                     </v-container>
                 </v-card-text>
                 <v-card-actions>
-                    <v-spacer></v-spacer>
+                    <v-spacer/>
                     <v-btn @click="editTweet" color="blue darken-1" text>Save</v-btn>
                 </v-card-actions>
             </v-card>
