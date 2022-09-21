@@ -23,7 +23,7 @@
     "vue": "^2.6.10",
     "vue-datetime": "^1.0.0-beta.10",
     "vue-resource": "^1.5.1",
-    "vuetify": "^2.1.9",
+    "vuetify": "^2.6.10",
     "weekstart": "^1.0.1"
   },
   "scripts": {
