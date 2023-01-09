@@ -19,7 +19,7 @@
     "webpack-dev-server": "^3.9.0"
   },
   "dependencies": {
-    "luxon": "^1.21.1",
+    "luxon": "^2.5.2",
     "vue": "^2.6.10",
     "vue-datetime": "^1.0.0-beta.10",
     "vue-resource": "^1.5.1",
